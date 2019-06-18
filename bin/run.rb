@@ -3,32 +3,36 @@ require_relative "../app/models/game.rb"
 
 def start
   puts 'Please submit your username or create a new account. To create a new account, type "new".'
-  # input = gets.chomp
-  # if input == "new"
-  #   login
-  # end
+  input = gets.chomp
+  if input == "new"
+    new_player
+  else
+    login
+  end
+end
+
+def new_player
+  puts "Please choose a username"
+  new_username = gets.chomp
+  Player.create(name: new_username)
+  main_menu
 end
 
 def login
+  puts "Please enter your username"
   input = gets.chomp
-  if input == "new"
-    puts "Please choose a username"
-    new_username = gets.chomp
-    Player.create(name: new_username)
-    main_menu
-  else
-    Player.all.each do |player|
-      if input == player.name
-        main_menu
-      else
-        puts "Invalid username. Please try again or create a new account."
-      end
+
+  Player.all.each do |user|
+    if input == user.name
+      main_menu
+    else
+      puts "Invalid username. Please try again or create a new account."
     end
   end
 end
 
-def main_menu
-  puts "Welcome #{player.name}! What would you like to do?"
+def main_menu(user)
+  puts "Welcome #{user.name}! What would you like to do?"
   puts ""
   puts "[1] Add a new game"
   puts "[2] Create new game review"
@@ -41,17 +45,40 @@ def main_menu
 end
 
 def main_menu_action(choice)
-  case input
+  case choice
   when 1 #instantiates new game
+    new_game
   when "2" #instantiate new review
-    Review.create
+    new_review
   when "3" #shows all reviews
-    Review.all
-  when "4"
-    #find review by name
+    all_reviews
+  when "4" #find review by name
+    find_review_by_name
   when "5"
-    puts "Goodbye, #{player.name}!"
+    exit
   end
+end
+
+def new_game
+  puts "Please type the name of your game"
+  Game.create
+end
+
+def new_review
+  Review.create
+end
+
+def all_reviews
+  Review.all
+end
+
+def find_review_by_name
+end
+
+def exit
+  puts "Goodbye, #{user.name}!"
+  system("clear")
+  start
 end
 
 def review_menu
@@ -65,14 +92,13 @@ def review_menu
   review_menu_action(choice)
 end
 
-def review_menu_action
+def review_menu_action(choice)
   case input
-  when "1" #update
-  when "2" # delete
+  when "1" #update review
+  when "2" # delete review
   when "3"
     main_menu
   end
 end
 
 start
-login
