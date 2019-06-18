@@ -6,6 +6,6 @@ class Review < ActiveRecord::Base
     review_content = gets.chomp
     puts "Please put a rating for this game (1-10)"
     review_rating = gets.chomp
-    Review.create(game: game_name, content: review_content, rating: review_rating)
+    Review.create(user: user_id, game: game_name, content: review_content, rating: review_rating)
   end
 end
