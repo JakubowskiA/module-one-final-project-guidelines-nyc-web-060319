@@ -3,7 +3,8 @@ require_relative "../config/environment"
 require_relative "../app/models/game.rb"
 
 def start
-  puts 'Please submit your username or create a new account. To create a new account, type "new" or enter "login" if you already have an account.'
+  puts "Please submit your username or create a new account."
+  puts 'To create a new account, type "new" or enter "login" if you already have an account.'
   puts "To exit, type exit."
   input = gets.chomp
   if input == "new"
@@ -144,14 +145,8 @@ def find_my_review_by_game_name
     @review = Review.all.find { |rev| rev.game_id == game.id }
     puts "Here is your review #{@review.text}"
   else
-    puts "We couldn't find a game you reviewed by that name. To try again, type Y. To return to the main menu, type any other key."
-    # if gets.chomp =~ /[yY]/
-    #   find_my_review_by_game_name
-    # else
-    #   main_menu
-    # end
+    puts "We couldn't find a review for that game. To try again, type Y. To return to the main menu, type any other key."
   end
-
   review_menu
 end
 
@@ -204,11 +199,7 @@ def update_review
   else (1..10).include?(new_rating.to_i) #ensures rating is a number between 1 and 10
     @review.update(rating: new_rating)
  # else #new_rating wasn’t “n”, or a number between 1-10
-       #   puts "Incorrect entry. Please enter a number between 1 and 10."
-       #   #How would you make it so user is able to re-input a new rating value?
       end
-
-  #show the newly updated review using puts and string interpolation?
   puts "Your review has been updated."
 end
 
@@ -224,7 +215,7 @@ def delete_review
 end
 
 def delete_all_reviews
-  puts "Are you sure you want to delete all reviews? Press Y to delete, press any other key to return to main menu."
+  puts "Are you sure you want to delete all reviews? Press Y to delete, press N to return to main menu."
   if gets.chomp =~ /[yY]/
     Review.all.where(player_id: @user.id).destroy_all
     #my_reviews.destroy_all
@@ -306,6 +297,3 @@ def friend_reviews
 end
 
 start
-
-#How to add user communications
-#How to remove all reviews for a specific user

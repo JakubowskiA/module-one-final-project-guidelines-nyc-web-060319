@@ -87,8 +87,4 @@ class Player < ActiveRecord::Base
     # Relationship.new(friender_id: self.id, friendee_id: friendee)
     Relationship.create(friender_id: self.id, friendee_id: find_friend_id(friend_username))
   end
-
-  # def player_reviews
-
-  # end
 end

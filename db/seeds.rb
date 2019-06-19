@@ -18,8 +18,9 @@ Relationship.create(friender_id: p3.id, friendee_id: p4.id)
 
 #All Games
 g1 = Game.create(name: "Destiny", genre: "FPS", platforms: "PC, Playstation")
-g2 = Game.create(name: "Rainbow 6 Seige", genre: "FPS", platforms: "PC")
-g3 = Game.create(name: "Super Mario Odyessy", genre: "Platformer", platforms: "Switch")
+g2 = Game.create(name: "Rainbow 6 Siege", genre: "FPS", platforms: "PC")
+g3 = Game.create(name: "Super Mario Odyssey", genre: "Platformer", platforms: "Switch")
+g4 = Game.create(name: "Skyrim", genre: "Fantasy", platforms: "PC, Switch")
 
 #All reviews
 r1 = Review.create(player_id: p1.id, game_id: g1.id, rating: 9, text: "I love this game! It creates such a cool world!")
