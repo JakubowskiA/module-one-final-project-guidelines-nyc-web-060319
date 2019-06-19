@@ -11,6 +11,7 @@ def start
   elsif input == "login"
     login
   elsif input == "exit"
+    fancy_goodbye
     exit
   else
     puts "Please submit a valid response."
@@ -79,6 +80,7 @@ def main_menu_action(choice)
   when "7"
     my_friends
   when "8"
+    fancy_goodbye
     exit
   end
 end
@@ -105,7 +107,7 @@ def new_review
   review_content = gets.chomp
   puts "Please put a rating for this game (1-10)."
   review_rating = gets.chomp
-  Review.create(player_id: @user.id, game_id: game_id, rating: review_rating, text: review_content)
+  new_review = Review.create(player_id: @user.id, game_id: game_id, rating: review_rating, text: review_content)
 end
 
 def my_reviews_w_script
@@ -241,6 +243,16 @@ def fancy_welcome
   puts " \\_/\\_/  |____\\ |____\\ \\_____/  \\___/  |_|  |_| |____\\  |__|"
 end
 
+def fancy_goodbye
+  puts " ______     ____    ____   _____   _____ __     __ ______  _______"
+  puts "/  ___ \\   / __ \\  / __ \\ |  __ \\ |  _  \\\\ \\   / /|  ____| \\     /"
+  puts "| /   \\_\\ | /  \\ || /  \\ || |  \\ || | | | \\ \\ / / | |       \\   /"
+  puts "| |  ____ | |  | || |  | || |  | || |/  /  \\ ` /  |  --.     \\_/"
+  puts "| | |_  _|| |  | || |  | || |  | ||  _  \\   | |   |  --‘      _"
+  puts "| \\__/  | | \\__/ || \\__/ || |__/ || |_\\ |   | |   | |____    / \\"
+  puts " \\____/_|  \\____/  \\____/ |_____/ |_____/   |_|   |______|   \\_/"
+end
+
 def add_new_friend
   puts "Please enter your friend's username."
   friend_username = gets.chomp
@@ -258,7 +270,7 @@ def my_friends
   end
 end
 
-def friend_reviews
+def friend_games
   puts "Please enter your friend's username."
   friend_username = gets.chomp
   friend_id = Player.all.find do |player|
@@ -267,13 +279,30 @@ def friend_reviews
   review_game_id = Review.all.where(player_id: friend_id).map do |review|
     review.game_id
   end
-  review_game = Game.all.find(review_game_id).map do |game|
+  review_games = Game.all.find(review_game_id).map do |game|
     game.name
   end
-  review_text = Review.all.where(player_id: friend_id).map do |review|
+  puts review_games
+  friend_reviews
+end
+
+def friend_reviews
+  puts "Please enter the game you would like to see."
+  game_name = gets.chomp
+  game_id = Game.all.find do |game|
+    game.name == game_name
+  end.id
+  game_review = Review.all.where(game_id: game_id).map do |review|
     review.text
   end
-  puts "#{review_game} , #{review_text}"
+  puts game_review
+  puts 'To return to the main menu enter "main". To return to your friend\'s games enter "friends".'
+  input = gets.chomp
+  if input == "main"
+    main_menu
+  elsif input == "friends"
+    friend_games
+  end
 end
 
 start
