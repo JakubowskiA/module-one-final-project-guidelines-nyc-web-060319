@@ -4,11 +4,14 @@ require_relative "../app/models/game.rb"
 
 def start
   puts 'Please submit your username or create a new account. To create a new account, type "new" or enter "login" if you already have an account.'
+  puts "To exit, type exit."
   input = gets.chomp
   if input == "new"
     new_player
   elsif input == "login"
     login
+  elsif input == "exit"
+    exit
   else
     puts "Please submit a valid response."
     start
@@ -34,6 +37,7 @@ def login
 end
 
 def welcome(user)
+  fancy_welcome
   puts "Welcome #{user.name}!"
   main_menu
 end
@@ -45,7 +49,8 @@ def main_menu
   puts "[2] Create new game review"
   puts "[3] See all of my reviews"
   puts "[4] Find a review by game"
-  puts "[5] Exit" #this works
+  puts "[5] Delete all reviews"
+  puts "[6] Exit" #this works
 
   choice = gets.chomp
   main_menu_action(choice)
@@ -62,7 +67,9 @@ def main_menu_action(choice)
   when "4" #find review by name
     find_my_review_by_game_name
   when "5"
-    exit_program
+    delete_all_reviews
+  when "6"
+    exit
   end
 end
 
@@ -204,4 +211,27 @@ def delete_review
   end
 end
 
+def delete_all_reviews
+  puts "Are you sure you want to delete all reviews? Press Y to delete, press any other key to return to main menu."
+  if gets.chomp =~ /[yY]/
+    review.where(player_id == @user.id).destroy_all
+    #my_reviews.destroy_all
+    puts "All reviews deleted."
+  elsif gets.chomp =~ /[nN]/
+    main_menu
+  end
+end
+
+def fancy_welcome
+  puts " _    _   ____   _      _____    ___    _    _   ____   ____"
+  puts "| |  | | |  __/ | |    /  _  \\  / _ \\  | \\  / | |  __/ \\    /"
+  puts "| |  | | | |__  | |    | | |_/ | / \\ | |  \\/  | | |__   \\  /"
+  puts "| |  | | |  __| | |    | |  _  | | | | | |\\/| | |  __|   \\/"
+  puts "| \\/\\/ | | |__  | |__  | |_| \\ | \\_/ | | |  | | | |__    __ "
+  puts " \\_/\\_/  |____\\ |____\\ \\_____/  \\___/  |_|  |_| |____\\  |__|"
+end
+
 start
+
+#How to add user communications
+#How to remove all reviews for a specific user

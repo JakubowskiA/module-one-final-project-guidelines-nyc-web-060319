@@ -1,4 +1,13 @@
 class Player < ActiveRecord::Base
+  has_many :friender_relationships, class_name: "Relationship",
+                                    foreign_key: "friendee_id",
+                                    dependent: :destroy
+  has_many :friendee_relationships, class_name: "Relationship",
+                                    foreign_key: "friender_id",
+                                    dependent: :destroy
+  has_many :frienders, through: :friender_relationships, source: :friender
+  has_many :friendees, through: :friendee_relationships, source: :friendee
+
   def my_reviews
     Review.all.select do |review|
       review.user == self
@@ -56,5 +65,20 @@ class Player < ActiveRecord::Base
     #
     #
     #end
+
+  end
+
+  def player_friends
+    self.frienders.concat(self.friendees)
+  end
+
+  def find_friend_id(friend_username)
+    friend = Player.all.find { |player| player.name == friend_username }
+    friend.id
+  end
+
+  def add_friend(friend_username)
+    # Relationship.new(friender_id: self.id, friendee_id: friendee)
+    Relationship.create(friender_id: self.id, friendee_id: find_friend_id(friend_username))
   end
 end
