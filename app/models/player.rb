@@ -72,6 +72,12 @@ class Player < ActiveRecord::Base
     self.frienders.concat(self.friendees)
   end
 
+  def friend_names
+    player_friends.map do |friend|
+      friend.name
+    end
+  end
+
   def find_friend_id(friend_username)
     friend = Player.all.find { |player| player.name == friend_username }
     friend.id

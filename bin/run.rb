@@ -29,11 +29,15 @@ def login
   puts "Please enter your username"
   input = gets.chomp
 
-  @user = Player.all.find do |user|
-    input == user.name
+  if Player.all.any? { |player| player.name == input }
+    @user = Player.all.find do |user|
+      input == user.name
+    end
+    welcome(@user)
+  else
+    puts "Invalid username. Please try again."
+    start
   end
-
-  welcome(@user)
 end
 
 def welcome(user)
@@ -50,7 +54,9 @@ def main_menu
   puts "[3] See all of my reviews"
   puts "[4] Find a review by game"
   puts "[5] Delete all reviews"
-  puts "[6] Exit" #this works
+  puts "[6] Add a friend"
+  puts "[7] See my friends"
+  puts "[8] Exit"
 
   choice = gets.chomp
   main_menu_action(choice)
@@ -69,6 +75,10 @@ def main_menu_action(choice)
   when "5"
     delete_all_reviews
   when "6"
+    add_new_friend
+  when "7"
+    my_friends
+  when "8"
     exit
   end
 end
@@ -214,7 +224,7 @@ end
 def delete_all_reviews
   puts "Are you sure you want to delete all reviews? Press Y to delete, press any other key to return to main menu."
   if gets.chomp =~ /[yY]/
-    review.where(player_id == @user.id).destroy_all
+    Review.all.where(player_id: @user.id).destroy_all
     #my_reviews.destroy_all
     puts "All reviews deleted."
   elsif gets.chomp =~ /[nN]/
@@ -229,6 +239,41 @@ def fancy_welcome
   puts "| |  | | |  __| | |    | |  _  | | | | | |\\/| | |  __|   \\/"
   puts "| \\/\\/ | | |__  | |__  | |_| \\ | \\_/ | | |  | | | |__    __ "
   puts " \\_/\\_/  |____\\ |____\\ \\_____/  \\___/  |_|  |_| |____\\  |__|"
+end
+
+def add_new_friend
+  puts "Please enter your friend's username."
+  friend_username = gets.chomp
+  @user.add_friend(friend_username)
+end
+
+def my_friends
+  puts "Here are your friends."
+  puts @user.friend_names
+  puts ""
+  puts "Enter 'reviews' to see your friends' reviews."
+  input = gets.chomp
+  if input == "reviews"
+    friend_reviews
+  end
+end
+
+def friend_reviews
+  puts "Please enter your friend's username."
+  friend_username = gets.chomp
+  friend_id = Player.all.find do |player|
+    player.name == friend_username
+  end.id
+  review_game_id = Review.all.where(player_id: friend_id).map do |review|
+    review.game_id
+  end
+  review_game = Game.all.find(review_game_id).map do |game|
+    game.name
+  end
+  review_text = Review.all.where(player_id: friend_id).map do |review|
+    review.text
+  end
+  puts "#{review_game} , #{review_text}"
 end
 
 start
