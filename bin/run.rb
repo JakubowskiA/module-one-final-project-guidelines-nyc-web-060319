@@ -21,10 +21,10 @@ def start
   elsif input == "login"
     login
   elsif input == "exit"
-    fancy_goodbye
-    exit
+    exit_program
   else
     puts "Please submit a valid response."
+    sleep (1)
     start
   end
 end
@@ -32,12 +32,19 @@ end
 def new_player
   puts "Please choose a username"
   new_username = gets.chomp
-  @user = Player.create(name: new_username)
-  welcome(@user)
+  if Player.all.any? { |player| player.name == new_username }
+    puts "This user already exists. Please choose a different username."
+    sleep(2)
+    start
+  else
+    @user = Player.create(name: new_username)
+    welcome(@user)
+  end
 end
 
 def login
   divider
+  login_animation
   puts "Please enter your username"
   input = gets.chomp
 
@@ -48,6 +55,7 @@ def login
     welcome(@user)
   else
     puts "Invalid username. Please try again."
+    sleep (1)
     start
   end
 end
@@ -88,15 +96,18 @@ def main_menu_action(choice)
     my_reviews_w_script
   when "4" #find review by name
     find_my_review_by_game_name
-  when "5"
+  when "5" #gives option to delete all reviews
     delete_all_reviews
-  when "6"
+  when "6" #prompts user to add new friend
     add_new_friend
-  when "7"
+  when "7" #shows user's friends
     my_friends
-  when "8"
-    fancy_goodbye
-    exit
+  when "8" #exits program
+    exit_program
+  else
+    puts "Invalid response. Please enter a number from 1-8."
+    sleep(2)
+    main_menu
   end
 end
 
@@ -104,15 +115,21 @@ def new_game
   divider
   puts "Please enter the name of your game."
   game_name = gets.chomp
-  puts "Please enter the genre of your game."
-  game_genre = gets.chomp
-  puts "Please enter the platforms on which your game is available."
-  game_platforms = gets.chomp
-  Game.create(name: game_name, genre: game_genre, platforms: game_platforms)
-  puts "Your game has been created."
-  puts "Returning to main menu."
-  divider
-  main_menu
+  if Game.all.any? { |game| game.name == game_name }
+    puts "We already have a record of this game."
+    sleep(2)
+    main_menu
+  else
+    puts "Please enter the genre of your game."
+    game_genre = gets.chomp
+    puts "Please enter the platforms on which your game is available."
+    game_platforms = gets.chomp
+    Game.create(name: game_name, genre: game_genre, platforms: game_platforms)
+    puts "Your game has been created."
+    puts "Returning to main menu."
+    divider
+    main_menu
+  end
 end
 
 def new_review
@@ -132,11 +149,11 @@ def new_review
     review_rating = gets.chomp
     new_review = Review.create(player_id: @user.id, game_id: game_id, rating: review_rating, text: review_content)
   else
-    puts "Game name not recognized. Do you want to create the first review for this game?"
-    puts "Type Y for yes, press any other key to return to the main menu."
+    puts "Game name not recognized."
+    puts "Enter 'new' to create a new game. Enter any other key to return to the main menu."
     divider
     input = gets.chomp
-    if input =~ /[yY]/
+    if input == "new"
       new_game
     else
       main_menu
@@ -163,12 +180,15 @@ def my_reviews_w_script
   puts ""
   my_reviews.each do |review|
     puts game_name_by_id(review.game_id) + ": " + review.text
+    puts ""
   end
   divider
-  puts "Enter 'main' to return to the main menu."
+  puts "Enter 'main' to return to the main menu or enter 'exit' to exit the program."
   input = gets.chomp
   if input == "main"
     main_menu
+  elsif input == "exit"
+    exit_program
   end
 end
 
@@ -180,23 +200,64 @@ def find_my_review_by_game_name
   puts "Please enter the name of the game you want to find the review for."
   #binding.pry
   game_name = gets.chomp
-  game = Game.all.find do |game|
-    game.name == game_name
-  end
+  if Game.all.any? { |game| game.name == game_name }
+    game = Game.all.find do |game|
+      game.name == game_name
+    end
 
-  if Review.all.find { |rev| rev.game_id == game.id }
-    @review = Review.all.find { |rev| rev.game_id == game.id }
-    puts "Here is your review #{@review.text}"
+    if Review.all.find { |rev| rev.game_id == game.id }
+      @review = Review.all.find { |rev| rev.game_id == game.id }
+      puts "Here is your review #{@review.text}"
+    else
+      puts "We couldn't find a review for that game."
+      find_my_review_by_game_name
+    end
+    review_menu
   else
-    puts "We couldn't find a review for that game."
+    puts "We couldn't find a record for this game."
+    puts "Enter 'new' to create a new game, enter 'main' to return to the main menu or enter anything else to exit the program."
+    input = gets.chomp
+    if input == "main"
+      main_menu
+    elsif input == "new"
+      new_game
+    else
+      exit_program
+    end
   end
-  review_menu
 end
 
+# def find_my_review_by_game_name
+#   puts "Please enter the name of the game you want to find the review for."
+#   #binding.pry
+#   game_name = gets.chomp
+#   if Game.all.any? { |game| game.name == game_name }
+#     game = Game.all.find do |game|
+#       game.name == game_name
+#     end
+#   else
+#     puts "We do not have a review for that game."
+#     puts "Enter 'new' to create a new record for your game or enter anything else to return to the main menu."
+#     if input == "new"
+#       new_review
+#     else
+#       main_menu
+#     end
+#   end
+
+#   if Review.all.find { |rev| rev.game_id == game.id }
+#     @review = Review.all.find { |rev| rev.game_id == game.id }
+#     puts "Here is your review #{@review.text}"
+#   else
+#     puts "We couldn't find a review for that game."
+#   end
+#   review_menu
+# end
+
 def exit_program
-  puts "Goodbye!"
+  goodbye_wave
+  #sleep(1)
   system("clear")
-  start
 end
 
 def review_menu
@@ -266,35 +327,17 @@ end
 
 def delete_all_reviews
   divider
-  puts "Are you sure you want to delete all reviews? Enter 'yes' to delete, enter 'no' to return to main menu."
-  if gets.chomp = "yes"
+  puts "Are you sure you want to delete all reviews? Enter 'yes' to delete, enter anything else to return to main menu."
+  input = gets.chomp
+  if input == "yes"
     Review.all.where(player_id: @user.id).destroy_all
     puts "All reviews deleted."
     puts "Returning to main menu."
     divider
     main_menu
-  elsif gets.chomp = "no"
+  else
     main_menu
   end
-end
-
-def fancy_welcome
-  puts " _    _   ____   _      _____    ___    _    _   ____   ____"
-  puts "| |  | | |  __/ | |    /  _  \\  / _ \\  | \\  / | |  __/ \\    /"
-  puts "| |  | | | |__  | |    | | |_/ | / \\ | |  \\/  | | |__   \\  /"
-  puts "| |  | | |  __| | |    | |  _  | | | | | |\\/| | |  __|   \\/"
-  puts "| \\/\\/ | | |__  | |__  | |_| \\ | \\_/ | | |  | | | |__    __ "
-  puts " \\_/\\_/  |____\\ |____\\ \\_____/  \\___/  |_|  |_| |____\\  |__|"
-end
-
-def fancy_goodbye
-  puts " ______     ____    ____   _____   _____ __     __ ______  _______"
-  puts "/  ___ \\   / __ \\  / __ \\ |  __ \\ |  _  \\\\ \\   / /|  ____| \\     /"
-  puts "| /   \\_\\ | /  \\ || /  \\ || |  \\ || | | | \\ \\ / / | |       \\   /"
-  puts "| |  ____ | |  | || |  | || |  | || |/  /  \\ ` /  |  --.     \\_/"
-  puts "| | |_  _|| |  | || |  | || |  | ||  _  \\   | |   |  --‘      _"
-  puts "| \\__/  | | \\__/ || \\__/ || |__/ || |_\\ |   | |   | |____    / \\"
-  puts " \\____/_|  \\____/  \\____/ |_____/ |_____/   |_|   |______|   \\_/"
 end
 
 def add_new_friend
@@ -330,11 +373,11 @@ def my_friends
   input = gets.chomp
   if input == "reviews"
     friend_reviews
-  elsif input =~ "main"
+  elsif input == "main"
     main_menu
-  elsif input =~ "exit"
+  elsif input == "exit"
     fancy_goodbye
-    exit
+    exit_program
   else
     puts "Invalid input.Please try again."
     puts ""
@@ -379,49 +422,6 @@ def friend_reviews
     puts "Invalid response, returning to main menu."
     main_menu
   end
-end
-
-def welcome_ascii
-  puts " _    _   ____   _      _____    ___    _    _   ____   ____"
-  puts '| |  | | |  __/ | |    /  _  \  / _ \  | \  / | |  __/ \    /'
-  puts '| |  | | | |__  | |    | | |_/ | / \ | |  \/  | | |__   \  /'
-  puts '| |  | | |  __| | |    | |  _  | | | | | |\/| | |  __|   \/'
-  puts '| \/\/ | | |__  | |__  | |_| \ | \_/ | | |  | | | |__    __ '
-  puts ' \_/\_/  |____\ |____\ \_____/  \___/  |_|  |_| |____\  |__|'
-end
-
-def welcome_ascii_frame_2
-  puts " _  * _   ____*  _   *  _____  * ___   *_    _   ____  *____"
-  puts '| |* | | |  __/ | |   */  _  \* / _ \* | \ */ |*|  __/ \    /'
-  puts '| |  | | | |__ *| |*   | | |_/ | / \ | |  \/  | | |__ * \  /'
-  puts '| | *| | |  __| | |    | |* _  | |*| | | |\/| | |  __| * \/'
-  puts '| \/\/ |*| |__* | |__ *| |_| \ | \_/ | | |* | |*| |__*   __ '
-  puts ' \_/\_/  |____\*|____\ \_____/ *\___/ *|_| *|_| |____\ *|__|'
-end
-
-def welcome_ascii_frame_3
-  puts " _ *  _   ____ * _  *   _____ *  ___    _*   _   ____*  ____"
-  puts '| | *| | |  __/ | |    /  _  \ */ _ \  | \* / | |  __/ \    /'
-  puts '| |  | |*| |__  | | *  | | |_/ | / \ | |  \/  |*| |__  *\  /'
-  puts '| |* | | |  __| | |    | | *_  | | | | | |\/| | |  __|*  \/'
-  puts '| \/\/ | | |__ *| |__* | |_| \ | \_/ |*| | *| | | |__  * __ '
-  puts ' \_/\_/ *|____\ |____\ \_____/* \___/  |_|* |_|*|____\* |__|'
-end
-
-def welcome_animation
-  5.times do
-    # puts "\e[H\e[2J"
-    # welcome_ascii
-    # sleep(0.3)
-    puts "\e[H\e[2J"
-    welcome_ascii_frame_2
-    sleep(0.3)
-    puts "\e[H\e[2J"
-    welcome_ascii_frame_3
-    sleep(0.3)
-    puts "\e[H\e[2J"
-  end
-  welcome_ascii
 end
 
 start
