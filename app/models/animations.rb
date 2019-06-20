@@ -196,3 +196,43 @@ def goodbye_wave
   end
   exit
 end
+
+#hello animation
+def hello
+  puts " __   __          ___   ___           ___"
+  puts " |    |            |     |           |   |"
+  puts " |____|    ___     |     |    ___     | |"
+  puts ' |    |   /__/ _   |     |   /   \\     |'
+  puts '_|_  _|_  \\___/   _|_   _|_  \\___/    (@)'
+end
+
+def hello_f2
+  puts " __   __       *  ___   ___      *    ___"
+  puts " |  * |   *        | *   |    *      |   |"
+  puts " |____|*   ___ *   |   * |    ___  *  | |"
+  puts ' | *  |   /__/ _   |  *  |   /   \\     |'
+  puts '_|_  _|_ *\\___/   _|_   _|_  \\___/ *  (@)'
+end
+
+def hello_f3
+  puts " __  *__       *  ___   ___           ___"
+  puts " |    |     *      |   * |      *    |   |"
+  puts " |____| *  ___     |     |  * ___   * | |"
+  puts ' |  * |   /__/ _*  | *   |   /   \\   * |'
+  puts '_|_  _|_* \\___/   _|_ * _|_  \\___/    (@)'
+end
+
+def hello_animation
+  2.times do
+    puts "\e[H\e[2J"
+    hello_f2
+    sleep(0.3)
+    puts "\e[H\e[2J"
+    hello_f3
+    sleep(0.3)
+    puts "\e[H\e[2J"
+    hello_f2
+    puts "\e[H\e[2J"
+  end
+  hello
+end

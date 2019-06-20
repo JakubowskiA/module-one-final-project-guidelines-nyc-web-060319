@@ -8,6 +8,8 @@ end
 
 def start
   system("clear")
+  hello_animation
+  puts ""
   divider
   puts "Please submit your username or create a new account."
   puts ""
@@ -76,7 +78,7 @@ def main_menu
   puts "[2] Create new game review"
   puts "[3] See all of my reviews"
   puts "[4] Find a review by game"
-  puts "[5] Delete all reviews"
+  puts "[5] Delete all of your reviews"
   puts "[6] Add a friend"
   puts "[7] See my friends"
   puts "[8] Exit"
@@ -116,7 +118,7 @@ def new_game
   puts "Please enter the name of your game."
   game_name = gets.chomp
   if Game.all.any? { |game| game.name == game_name }
-    puts "We already have a record of this game."
+    puts "We already have a record of this game. Returning to main menu."
     sleep(2)
     main_menu
   else
@@ -126,6 +128,7 @@ def new_game
     game_platforms = gets.chomp
     Game.create(name: game_name, genre: game_genre, platforms: game_platforms)
     puts "Your game has been created."
+    sleep(1)
     puts "Returning to main menu."
     divider
     main_menu
@@ -148,6 +151,10 @@ def new_review
     puts "Please put a rating for this game (1-10)."
     review_rating = gets.chomp
     new_review = Review.create(player_id: @user.id, game_id: game_id, rating: review_rating, text: review_content)
+    puts "Your review has been created."
+    puts "#{game_name}: Rating: #{new_review.rating} #{new_review.text}"
+    sleep(5)
+    main_menu
   else
     puts "Game name not recognized."
     puts "Enter 'new' to create a new game. Enter any other key to return to the main menu."
@@ -183,7 +190,7 @@ def my_reviews_w_script
     puts ""
   end
   divider
-  puts "Enter 'main' to return to the main menu or enter 'exit' to exit the program."
+  puts "Enter 'main' to return to the main menu or enter anything else to exit the program."
   input = gets.chomp
   if input == "main"
     main_menu
@@ -205,13 +212,11 @@ def find_my_review_by_game_name
       game.name == game_name
     end
 
-    if Review.all.find { |rev| rev.game_id == game.id }
-      @review = Review.all.find { |rev| rev.game_id == game.id }
-      puts "Here is your review #{@review.text}"
-    else
-      puts "We couldn't find a review for that game."
-      find_my_review_by_game_name
-    end
+    Review.all.find { |rev| rev.game_id == game.id }
+    @review = Review.all.find { |rev| rev.game_id == game.id }
+    puts "Here is your review: "
+    puts "#{@review.text}"
+
     review_menu
   else
     puts "We couldn't find a record for this game."
@@ -314,8 +319,9 @@ end
 
 def delete_review
   divider
-  puts "Are you sure you want to delete this review? Enter Y/N (N will return you to main menu)"
-  if gets.chomp =~ /[yY]/
+  puts "Are you sure you want to delete this review?"
+  puts "Enter 'yes' to delete the review. Enter anything else to return to the main menu."
+  if gets.chomp == "yes"
     @review.destroy
     puts "Review deleted. Returning to main menu"
     divider
@@ -347,9 +353,11 @@ def add_new_friend
   if Player.all.any? { |player| player.name == friend_username }
     @user.add_friend(friend_username)
     puts "Added #{friend_username} to your friends list!"
+    sleep(3)
+    main_menu
   else
-    puts "We couldn't find that friend in your friends list. To try again, enter 1."
-    puts "To return to the main menu, enter any other key."
+    puts "We couldn't find a user by that name."
+    puts "To try again, enter 1. To return to the main menu, enter any other key."
 
     input = gets.chomp
 
@@ -364,26 +372,27 @@ end
 def my_friends
   divider
   puts "Here are your friends."
+  puts ""
   puts @user.friend_names
   puts ""
-  puts "Enter 'reviews' to see your friends' reviews."
-  puts "Type 'main' to return to main menu."
-  puts "Type 'exit' to exit"
-  divider
-  input = gets.chomp
-  if input == "reviews"
-    friend_reviews
-  elsif input == "main"
-    main_menu
-  elsif input == "exit"
-    fancy_goodbye
-    exit_program
-  else
-    puts "Invalid input.Please try again."
-    puts ""
-    sleep(2)
-    my_friends
-  end
+  friend_games
+  # puts "Enter 'reviews' to see your friends' reviews."
+  # puts "Type 'main' to return to main menu."
+  # puts "Type 'exit' to exit"
+  # divider
+  # input = gets.chomp
+  # if input == "reviews"
+  #   friend_games
+  # elsif input == "main"
+  #   main_menu
+  # elsif input == "exit"
+  #   exit_program
+  # else
+  #   puts "Invalid input.Please try again."
+  #   puts ""
+  #   sleep(2)
+  #   my_friends
+  #end
 end
 
 def friend_games
@@ -398,29 +407,40 @@ def friend_games
   review_games = Game.all.find(review_game_id).map do |game|
     game.name
   end
+  divider
+  puts "These are the games your friend has reviewed."
+  puts ""
   puts review_games
   friend_reviews
 end
 
 def friend_reviews
-  puts "Please enter the game you would like to see."
-  game_name = gets.chomp
-  game_id = Game.all.find do |game|
-    game.name == game_name
-  end.id
-  game_review = Review.all.where(game_id: game_id).map do |review|
-    review.text
-  end
-  puts game_review
-  puts 'To return to the main menu enter "main". To return to your friend\'s games enter "friends".'
+  divider
+  puts "Please enter the game you would like to see or enter 'main' to return to the main menu."
   input = gets.chomp
   if input == "main"
     main_menu
-  elsif input == "friends"
-    friend_games
+  elsif Game.all.any? { |game| game.name == input }
+    game_id = Game.all.find do |game|
+      game.name == input
+    end.id
+    game_review = Review.all.where(game_id: game_id).map do |review|
+      review.text
+    end
+    puts game_review
+    puts 'To return to the main menu enter "main". To return to your friend\'s games enter "friends".'
+    input = gets.chomp
+    if input == "main"
+      main_menu
+    elsif input == "friends"
+      friend_games
+    else
+      puts "Invalid response, returning to main menu."
+      main_menu
+    end
   else
-    puts "Invalid response, returning to main menu."
-    main_menu
+    puts "Your friend has not reviewed this game."
+    friend_reviews
   end
 end
 
